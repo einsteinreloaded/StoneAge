@@ -1,0 +1,35 @@
+{
+  "name": "stoneage",
+  "version": "0.1.0",
+  "description": "Game made by stone age dude who only had stones",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pre-commit": "./node_modules/standard/bin/cmd.js src/**/**.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/einsteinreloaded/StoneAge.git"
+  },
+  "keywords": [
+    "game",
+    "stoneAge"
+  ],
+  "author": "khubo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/einsteinreloaded/StoneAge/issues"
+  },
+  "homepage": "https://github.com/einsteinreloaded/StoneAge#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "express": "^4.15.4",
+    "redis": "^2.8.0",
+    "socket.io": "^2.0.3",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "husky": "^0.14.3",
+    "standard": "^10.0.3"
+  }
+}
