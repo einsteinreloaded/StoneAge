@@ -1,7 +1,6 @@
-console.log('this is working!!')
 
 function submitUsername () {
-  var username = document.getElementById('username').value
+  let username = document.getElementById('username').value
   UserAction(username).then(setSession).catch(handleError)
 }
 
@@ -10,21 +9,20 @@ function UserAction (username) {
 
   return fetch(url, {
     method: 'POST',
-    body: JSON.stringify({ username: username }),
+    body: JSON.stringify({ username }),
     headers: new Headers({ 'Content-Type': 'application/json' })
   }).then(
     response => response.text()
-)
+  )
 }
 
 function handleError () {
-  alert('Game Initialisation Failed!! Please try again')
+  console.log('Game Initialisation Failed!! Please try again')
 }
 
 function setSession (data) {
-  var sessionId = data
-  console.log(sessionId)
+  let sessionId = data
   window.location.href = '/board.html'
 }
 
-Object.assign(window, {showLogin: submitUsername})
+Object.assign(window, {requestSession: submitUsername})

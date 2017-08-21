@@ -12,7 +12,7 @@ app.use(bodyParser.json()) // for parsing application/json
 app.use('/', express.static(path.join(__dirname, 'public')))
 
 app.post('/user', (request, response) => {
-  var username = request.body.username
+  let username = request.body.username
   response.end(username)
 })
 
