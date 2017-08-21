@@ -10,6 +10,7 @@ function UserAction (username) {
   return fetch(url, {
     method: 'POST',
     body: JSON.stringify({ username }),
+    credentials: 'include',
     headers: new Headers({ 'Content-Type': 'application/json' })
   }).then(
     response => response.text()
@@ -21,8 +22,13 @@ function handleError () {
 }
 
 function setSession (data) {
-  let sessionId = data
-  window.location.href = '/board.html'
+  data = JSON.parse(data)
+  if(!data.success)  { 
+    document.querySelector('#status').textContent = data.message
+  } else {
+    window.location.href = '/board.html'
+  }
+
 }
 
 Object.assign(window, { requestSession })
