@@ -26,7 +26,7 @@ app.post('/user', (req, res) => {
   }
   Promise.coroutine(function * () {
     let nameExists = yield db.checkUser(username)
-    if (!!nameExists) {
+    if (nameExists) {
       return res.send({success: false, message: 'user already exists'})
     }
 

@@ -23,12 +23,39 @@ function handleError () {
 
 function setSession (data) {
   data = JSON.parse(data)
-  if(!data.success)  { 
+  if (!data.success) {
     document.querySelector('#status').textContent = data.message
   } else {
     window.location.href = '/board.html'
   }
-
 }
 
-Object.assign(window, { requestSession })
+function startGame () {
+  //  initialise board game
+  document.querySelector('#gameManageBtn').textContent = 'Forfeit Game'
+  drawBoardCanvas()
+}
+
+function drawBoardCanvas () { // draw game board
+  let canvas = document.getElementById('boardCanvas')
+  let ctx = canvas.getContext('2d')
+  let offset = 10
+  ctx.strokeRect(offset, offset, canvas.width - 2 * offset, canvas.height - 2 * offset)
+  ctx.beginPath()
+  ctx.moveTo((canvas.width) / 2, offset)
+  ctx.lineTo((canvas.width) / 2, canvas.width - offset)
+  ctx.moveTo(offset, (canvas.width) / 2)
+  ctx.lineTo(canvas.width - offset, (canvas.width) / 2)
+  ctx.closePath()
+  ctx.stroke()
+  ctx.save()
+}
+function startRotation () {
+  let canvas = document.getElementById('boardCanvas');
+  let ctx = canvas.getContext('2d')
+
+  ctx.globalCompositeOperation = 'destination-over'
+  ctx.clearRect(0, 0, canvas.width, canvas.height) // clear canvas
+  requestAnimationFrame(startRotation())
+}
+Object.assign(window, { requestSession, startGame })
