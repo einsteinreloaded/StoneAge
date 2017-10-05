@@ -20,7 +20,7 @@ app.use('/', express.static(path.join(__dirname, 'public')))
 app.post('/user', (req, res) => {
   let { username } = req.body
 
-  if(!username) {
+  if (!username) {
     res.statusCode = 400
     return res.send({success: false, message: 'invalid username'})
   }
@@ -34,7 +34,7 @@ app.post('/user', (req, res) => {
     yield db.addUser(username, token)
     res.cookie('session', token, {maxAge: 86400})
     res.send({success: true, token})
-  }) ()
+  })()
 })
 
 app.listen(PORT, () => {
