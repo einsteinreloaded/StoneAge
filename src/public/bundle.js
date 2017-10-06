@@ -1,4 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+let sun = new Image()
+sun.src = 'https://mdn.mozillademos.org/files/1429/Canvas_earth.png'
 
 function requestSession () {
   let username = document.getElementById('username').value
@@ -34,13 +36,14 @@ function setSession (data) {
 function startGame () {
   //  initialise board game
   document.querySelector('#gameManageBtn').textContent = 'Forfeit Game'
-  drawBoardCanvas()
+  startRotation()
 }
 
 function drawBoardCanvas () { // draw game board
   let canvas = document.getElementById('boardCanvas')
   let ctx = canvas.getContext('2d')
   let offset = 10
+  ctx.clearRect(0, 0, canvas.width, canvas.height) // clear canvas
   ctx.strokeRect(offset, offset, canvas.width - 2 * offset, canvas.height - 2 * offset)
   ctx.beginPath()
   ctx.moveTo((canvas.width) / 2, offset)
@@ -49,15 +52,25 @@ function drawBoardCanvas () { // draw game board
   ctx.lineTo(canvas.width - offset, (canvas.width) / 2)
   ctx.closePath()
   ctx.stroke()
+  ctx.moveTo(0, 0)
   ctx.save()
 }
-function startRotation () {
-  let canvas = document.getElementById('boardCanvas');
-  let ctx = canvas.getContext('2d')
 
+function startRotation () {
+  let canvas = document.getElementById('boardCanvas')
+  let ctx = canvas.getContext('2d')
   ctx.globalCompositeOperation = 'destination-over'
-  ctx.clearRect(0, 0, canvas.width, canvas.height) // clear canvas
-  requestAnimationFrame(startRotation())
+  //ctx.clearRect(0, 0, canvas.width, canvas.height) // clear canvas
+  ctx.restore()
+  drawBoardCanvas()
+  ctx.translate(250, 250)
+  let time = new Date()
+  ctx.rotate(((2 * Math.PI) / 60) * time.getSeconds() + ((2 * Math.PI) / 60000) * time.getMilliseconds())
+  ctx.translate(20, 20)
+  ctx.drawImage(sun, 50, 50)
+  ctx.save()
+  ctx.restore()
+  requestAnimationFrame(startRotation)
 }
 Object.assign(window, { requestSession, startGame })
 
