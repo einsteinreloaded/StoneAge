@@ -1,4 +1,4 @@
-import { canvas, ctx, ballRadius, x, y, dx, dy, paddleHeight, paddleWidth, paddleX, rightPressed, leftPressed, startAnimation } from './drawBoard.js'
+import { canvas, ctx, ballRadius, x, y, dx, dy, paddleHeight, paddleWidth, paddleX, rightPressed, leftPressed, brickRowCount, brickColumnCount, brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks, score, startAnimation } from './drawBoard.js'
 
 function requestSession () {
   let username = document.getElementById('username').value
