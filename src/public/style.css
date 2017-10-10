@@ -2,3 +2,7 @@
     margin: 40px auto;
     text-align: center;
 }
+canvas{
+    background: #DDD;
+    border: 1px solid #000;
+}
