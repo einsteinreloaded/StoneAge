@@ -6,11 +6,15 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const Promise = require('bluebird')
-
 const PORT = process.env.PORT || 1337
 const app = express()
 const secret = 'redPikachu'
 
+let server = app.listen(PORT, () => {
+  winston.info(`Server started listening on ${PORT}`)
+})
+
+const io = require('socket.io').listen(server)
 app.use(bodyParser.json()) // for parsing application/json
 app.use(cookieParser())
 
@@ -37,6 +41,8 @@ app.post('/user', (req, res) => {
   })()
 })
 
-app.listen(PORT, () => {
-  winston.info(`Server started listening on ${PORT}`)
+io.on('connection', function (socket) {
+  socket.on('PlayersPaddlePositionChangeRequest', function (data) {
+    socket.broadcast.emit('PlayersPaddlePositionChangeDone', {token: data.token, x: data.x})
+  })
 })

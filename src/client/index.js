@@ -1,5 +1,7 @@
-import { canvas, ctx, ballRadius, x, y, dx, dy, paddleHeight, paddleWidth, paddleX, rightPressed, leftPressed, brickRowCount, brickColumnCount, brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks, score, startAnimation } from './drawBoard.js'
-
+import { canvas, ctx, ballRadius, x, y, dx, dy, paddleHeight, paddleWidth, paddleX, paddleTwoX, rightPressed, leftPressed, brickRowCount, brickColumnCount, brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks, score, setPaddleTwoPosition, startAnimation } from './drawBoard.js'
+import io from 'socket.io-client'
+const socket = io.connect()
+let token
 function requestSession () {
   let username = document.getElementById('username').value
   UserAction(username).then(setSession).catch(handleError)
@@ -27,14 +29,20 @@ function setSession (data) {
   if (!data.success) {
     document.querySelector('#status').textContent = data.message
   } else {
+    token = data.token
     window.location.href = '/board.html'
   }
 }
 
+socket.on('PlayersPaddlePositionChangeDone', function (data) {
+  setPaddleTwoPosition(data.x)
+  console.log(data.x)
+})
+
 function startGame () {
   //  initialise board game
   document.querySelector('#gameManageBtn').textContent = 'Forfeit Game'
-  setInterval(() => { startAnimation(ctx) }, 10)
+  setInterval(() => { startAnimation(token) }, 10)
 }
 
 Object.assign(window, { requestSession, startGame })
