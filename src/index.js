@@ -9,7 +9,7 @@ const Promise = require('bluebird')
 const PORT = process.env.PORT || 1337
 const app = express()
 const secret = 'redPikachu'
-
+let index
 let server = app.listen(PORT, () => {
   winston.info(`Server started listening on ${PORT}`)
 })
@@ -41,8 +41,16 @@ app.post('/user', (req, res) => {
   })()
 })
 
-io.on('connection', function (socket) {
+io.sockets.on('connection', function (socket) {
+  socket.join('GameRoom')
+  console.log('joining room')
+  socket.on('StartGame', function (data) {
+    io.in('GameRoom').emit('StartGameClient')
+  })
+  socket.on('JoinRoom', function (data) {
+    index = data.index
+  })
   socket.on('PlayersPaddlePositionChangeRequest', function (data) {
-    socket.broadcast.emit('PlayersPaddlePositionChangeDone', {token: data.token, x: data.x})
+    socket.broadcast.to('GameRoom').emit('PlayersPaddlePositionChangeDone', {token: data.token, x: data.x, index: data.index})
   })
 })

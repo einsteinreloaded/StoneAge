@@ -6458,10 +6458,10 @@ for (var c = 0; c < brickColumnCount; c++) {
     bricks[c][r] = { x: 0, y: 0, status: 1 };
   }
 }
-function setPaddleListeners() {
+function setPaddleListeners(token) {
   document.addEventListener('keydown', keyDownHandler, false);
   document.addEventListener('keyup', keyUpHandler, false);
-  document.addEventListener('mousemove', mouseMoveHandler, false);
+  // document.addEventListener('mousemove', mouseMoveHandler, false)
 
   function keyDownHandler(e) {
     if (e.keyCode === 39) {
@@ -6483,6 +6483,7 @@ function setPaddleListeners() {
     var relativeX = e.clientX - canvas.offsetLeft;
     if (relativeX > 0 && relativeX < canvas.width) {
       exports.paddleX = paddleX = relativeX - paddleWidth / 2;
+      //socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX })
     }
   }
 }
@@ -6517,11 +6518,15 @@ function clearBoard() {
   document.location.reload();
 }
 
-function setPaddleTwoPosition(x) {
-  exports.paddleTwoX = paddleTwoX = x;
+function setPaddleTwoPosition(x, index) {
+  if (index === 2) {
+    exports.paddleTwoX = paddleTwoX = x;
+  } else {
+    exports.paddleX = paddleX = x;
+  }
 }
 
-function startAnimation(token) {
+function startAnimation(token, index) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // drawBoardCanvas(ctx)
   drawBall(ctx);
@@ -6530,7 +6535,7 @@ function startAnimation(token) {
   // drawBricks(ctx)
   // drawScore(ctx)
   // collisionDetection(ctx)
-  setPaddleListeners();
+  setPaddleListeners(token);
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
     exports.dx = dx = -dx;
   }
@@ -6551,11 +6556,21 @@ function startAnimation(token) {
   }
 
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
-    exports.paddleX = paddleX += 7;
-    socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX });
+    if (index === 2) {
+      exports.paddleTwoX = paddleTwoX += 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index });
+    } else {
+      exports.paddleX = paddleX += 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index });
+    }
   } else if (leftPressed && paddleX > 0) {
-    exports.paddleX = paddleX -= 7;
-    socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX });
+    if (index === 2) {
+      exports.paddleTwoX = paddleTwoX -= 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index });
+    } else {
+      exports.paddleX = paddleX -= 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index });
+    }
   }
   exports.x = x += dx;
   exports.y = y += dy;
@@ -6644,7 +6659,8 @@ var _socket2 = _interopRequireDefault(_socket);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var socket = _socket2.default.connect();
-var token = void 0;
+var token = localStorage.getItem('token');
+var index = void 0;
 function requestSession() {
   var username = document.getElementById('username').value;
   UserAction(username).then(setSession).catch(handleError);
@@ -6672,22 +6688,29 @@ function setSession(data) {
   if (!data.success) {
     document.querySelector('#status').textContent = data.message;
   } else {
-    token = data.token;
+    localStorage.setItem('token', data.token);
     window.location.href = '/board.html';
   }
 }
-
 socket.on('PlayersPaddlePositionChangeDone', function (data) {
-  (0, _drawBoard.setPaddleTwoPosition)(data.x);
+  if (data.token !== token) {
+    (0, _drawBoard.setPaddleTwoPosition)(data.x, data.index);
+  }
   console.log(data.x);
 });
-
-function startGame() {
-  //  initialise board game
-  document.querySelector('#gameManageBtn').textContent = 'Forfeit Game';
+socket.on('StartGameClient', function (data) {
   setInterval(function () {
-    (0, _drawBoard.startAnimation)(token);
+    (0, _drawBoard.startAnimation)(token, index);
   }, 10);
+});
+function startGame(i) {
+  //  initialise board game
+  index = i;
+  document.querySelector('#gameManageBtn').textContent = 'Forfeit Game';
+  (0, _drawBoard.startAnimation)(token, index);
+  if (index === 2) {
+    socket.emit('StartGame');
+  }
 }
 
 Object.assign(window, { requestSession: requestSession, startGame: startGame });

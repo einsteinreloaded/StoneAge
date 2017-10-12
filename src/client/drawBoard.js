@@ -30,10 +30,10 @@ for (let c = 0; c < brickColumnCount; c++) {
     bricks[c][r] = { x: 0, y: 0, status: 1 }
   }
 }
-function setPaddleListeners () {
+function setPaddleListeners (token) {
   document.addEventListener('keydown', keyDownHandler, false)
   document.addEventListener('keyup', keyUpHandler, false)
-  document.addEventListener('mousemove', mouseMoveHandler, false)
+  // document.addEventListener('mousemove', mouseMoveHandler, false)
 
   function keyDownHandler (e) {
     if (e.keyCode === 39) {
@@ -55,6 +55,7 @@ function setPaddleListeners () {
     let relativeX = e.clientX - canvas.offsetLeft
     if (relativeX > 0 && relativeX < canvas.width) {
       paddleX = relativeX - paddleWidth / 2
+      //socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX })
     }
   }
 }
@@ -89,11 +90,15 @@ function clearBoard () {
   document.location.reload()
 }
 
-export function setPaddleTwoPosition (x) {
-  paddleTwoX = x
+export function setPaddleTwoPosition (x, index) {
+  if (index === 2) {
+    paddleTwoX = x
+  } else {
+    paddleX = x
+  }
 }
 
-export function startAnimation (token) {
+export function startAnimation (token, index) {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   // drawBoardCanvas(ctx)
   drawBall(ctx)
@@ -102,7 +107,7 @@ export function startAnimation (token) {
   // drawBricks(ctx)
   // drawScore(ctx)
  // collisionDetection(ctx)
-  setPaddleListeners()
+  setPaddleListeners(token)
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
     dx = -dx
   }
@@ -123,11 +128,21 @@ export function startAnimation (token) {
   }
 
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
-    paddleX += 7
-    socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX })
+    if (index === 2) {
+      paddleTwoX += 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index })
+    } else {
+      paddleX += 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index })
+    }
   } else if (leftPressed && paddleX > 0) {
-    paddleX -= 7
-    socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX })
+    if (index === 2) {
+      paddleTwoX -= 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index })
+    } else {
+      paddleX -= 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index })
+    }
   }
   x += dx
   y += dy
