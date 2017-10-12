@@ -6,11 +6,15 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const Promise = require('bluebird')
-
 const PORT = process.env.PORT || 1337
 const app = express()
 const secret = 'redPikachu'
+let index
+let server = app.listen(PORT, () => {
+  winston.info(`Server started listening on ${PORT}`)
+})
 
+const io = require('socket.io').listen(server)
 app.use(bodyParser.json()) // for parsing application/json
 app.use(cookieParser())
 
@@ -20,13 +24,13 @@ app.use('/', express.static(path.join(__dirname, 'public')))
 app.post('/user', (req, res) => {
   let { username } = req.body
 
-  if(!username) {
+  if (!username) {
     res.statusCode = 400
     return res.send({success: false, message: 'invalid username'})
   }
   Promise.coroutine(function * () {
     let nameExists = yield db.checkUser(username)
-    if (!!nameExists) {
+    if (nameExists) {
       return res.send({success: false, message: 'user already exists'})
     }
 
@@ -34,9 +38,19 @@ app.post('/user', (req, res) => {
     yield db.addUser(username, token)
     res.cookie('session', token, {maxAge: 86400})
     res.send({success: true, token})
-  }) ()
+  })()
 })
 
-app.listen(PORT, () => {
-  winston.info(`Server started listening on ${PORT}`)
+io.sockets.on('connection', function (socket) {
+  socket.join('GameRoom')
+  console.log('joining room')
+  socket.on('StartGame', function (data) {
+    io.in('GameRoom').emit('StartGameClient')
+  })
+  socket.on('JoinRoom', function (data) {
+    index = data.index
+  })
+  socket.on('PlayersPaddlePositionChangeRequest', function (data) {
+    socket.broadcast.to('GameRoom').emit('PlayersPaddlePositionChangeDone', {token: data.token, x: data.x, index: data.index})
+  })
 })
