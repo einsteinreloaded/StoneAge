@@ -6417,7 +6417,7 @@ module.exports = yeast;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.score = exports.bricks = exports.brickOffsetLeft = exports.brickOffsetTop = exports.brickPadding = exports.brickHeight = exports.brickWidth = exports.brickColumnCount = exports.brickRowCount = exports.leftPressed = exports.rightPressed = exports.paddleTwoX = exports.paddleX = exports.paddleWidth = exports.paddleHeight = exports.dy = exports.dx = exports.y = exports.x = exports.ballRadius = exports.ctx = exports.canvas = undefined;
+exports.hitcount = exports.score = exports.bricks = exports.brickOffsetLeft = exports.brickOffsetTop = exports.brickPadding = exports.brickHeight = exports.brickWidth = exports.brickColumnCount = exports.brickRowCount = exports.leftPressed = exports.rightPressed = exports.paddleTwoX = exports.paddleX = exports.paddleWidth = exports.paddleHeight = exports.dy = exports.dx = exports.y = exports.x = exports.ballRadius = exports.ctx = exports.canvas = undefined;
 exports.setPaddleTwoPosition = setPaddleTwoPosition;
 exports.startAnimation = startAnimation;
 
@@ -6449,7 +6449,7 @@ var brickOffsetTop = exports.brickOffsetTop = 30;
 var brickOffsetLeft = exports.brickOffsetLeft = 30;
 var bricks = exports.bricks = [];
 var score = exports.score = 0;
-
+var hitcount = exports.hitcount = 0;
 var socket = _socket2.default.connect();
 
 for (var c = 0; c < brickColumnCount; c++) {
@@ -6541,14 +6541,16 @@ function startAnimation(token, index) {
   }
   if (y + dy < ballRadius) {
     if (x > paddleTwoX && x < paddleTwoX + paddleWidth) {
-      exports.dy = dy = -dy;
+      exports.hitcount = hitcount += 1;
+      exports.dy = dy = hitcount % 10 === 0 ? -dy : -(dy / Math.abs(dy)) * (Math.abs(dy) + 1);
     } else {
       exports.dy = dy = -dy;
       clearBoard();
     }
   } else if (y + dy > canvas.height - ballRadius) {
     if (x > paddleX && x < paddleX + paddleWidth) {
-      exports.dy = dy = -dy;
+      exports.hitcount = hitcount += 1;
+      exports.dy = dy = hitcount % 10 === 0 ? -dy : -(dy / Math.abs(dy)) * (Math.abs(dy) + 1);
     } else {
       exports.dy = dy = -dy;
       clearBoard();
@@ -6712,6 +6714,8 @@ function startGame(i) {
   (0, _drawBoard.startAnimation)(token, index);
   if (index === 2) {
     socket.emit('StartGame');
+  } else {
+    socket.emit('JoinRoom');
   }
 }
 

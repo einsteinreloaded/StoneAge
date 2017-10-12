@@ -1,4 +1,4 @@
-import { canvas, ctx, ballRadius, x, y, dx, dy, paddleHeight, paddleWidth, paddleX, paddleTwoX, rightPressed, leftPressed, brickRowCount, brickColumnCount, brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks, score, setPaddleTwoPosition, startAnimation } from './drawBoard.js'
+import { canvas, ctx, ballRadius, x, y, dx, dy, paddleHeight, paddleWidth, paddleX, paddleTwoX, rightPressed, leftPressed, brickRowCount, hitcount, brickColumnCount, brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks, score, setPaddleTwoPosition, startAnimation } from './drawBoard.js'
 import io from 'socket.io-client'
 const socket = io.connect()
 let token = localStorage.getItem('token')
@@ -53,6 +53,8 @@ function startGame (i) {
   startAnimation(token, index)
   if (index === 2) {
     socket.emit('StartGame')
+  } else {
+    socket.emit('JoinRoom')
   }
 }
 

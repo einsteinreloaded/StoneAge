@@ -21,7 +21,7 @@ export let brickOffsetTop = 30
 export let brickOffsetLeft = 30
 export let bricks = []
 export let score = 0
-
+export let hitcount = 0
 const socket = io.connect()
 
 for (let c = 0; c < brickColumnCount; c++) {
@@ -113,14 +113,16 @@ export function startAnimation (token, index) {
   }
   if (y + dy < ballRadius) {
     if (x > paddleTwoX && x < paddleTwoX + paddleWidth) {
-      dy = -dy
+      hitcount++
+      dy = (hitcount % 10) === 0 ? -dy : -(dy / Math.abs(dy)) * (Math.abs(dy) + 1)
     } else {
       dy = -dy
       clearBoard()
     }
   } else if (y + dy > canvas.height - ballRadius) {
     if (x > paddleX && x < paddleX + paddleWidth) {
-      dy = -dy
+      hitcount++
+      dy = (hitcount % 10) === 0 ? -dy : -(dy / Math.abs(dy)) * (Math.abs(dy) + 1)
     } else {
       dy = -dy
       clearBoard()
