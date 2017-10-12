@@ -126,22 +126,21 @@ export function startAnimation (token, index) {
       clearBoard()
     }
   }
-
-  if (rightPressed && paddleX < canvas.width - paddleWidth) {
-    if (index === 2) {
-      paddleTwoX += 7
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index })
-    } else {
+  if (index === 1) {
+    if (rightPressed && paddleX < canvas.width - paddleWidth) {
       paddleX += 7
       socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index })
-    }
-  } else if (leftPressed && paddleX > 0) {
-    if (index === 2) {
-      paddleTwoX -= 7
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index })
-    } else {
+    } else if (leftPressed && paddleX > 0) {
       paddleX -= 7
       socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index })
+    }
+  } else {
+    if (rightPressed && paddleTwoX < canvas.width - paddleWidth) {
+      paddleTwoX += 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index })
+    } else if (leftPressed && paddleTwoX > 0) {
+      paddleTwoX -= 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index })
     }
   }
   x += dx

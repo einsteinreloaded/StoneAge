@@ -34,15 +34,18 @@ function setSession (data) {
     window.location.href = '/board.html'
   }
 }
+
 socket.on('PlayersPaddlePositionChangeDone', function (data) {
   if (data.token !== token) {
     setPaddleTwoPosition(data.x, data.index)
   }
   console.log(data.x)
 })
+
 socket.on('StartGameClient', function (data) {
   setInterval(() => { startAnimation(token, index) }, 10)
 })
+
 function startGame (i) {
   //  initialise board game
   index = i

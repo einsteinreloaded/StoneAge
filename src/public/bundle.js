@@ -6554,22 +6554,21 @@ function startAnimation(token, index) {
       clearBoard();
     }
   }
-
-  if (rightPressed && paddleX < canvas.width - paddleWidth) {
-    if (index === 2) {
-      exports.paddleTwoX = paddleTwoX += 7;
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index });
-    } else {
+  if (index === 1) {
+    if (rightPressed && paddleX < canvas.width - paddleWidth) {
       exports.paddleX = paddleX += 7;
       socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index });
-    }
-  } else if (leftPressed && paddleX > 0) {
-    if (index === 2) {
-      exports.paddleTwoX = paddleTwoX -= 7;
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index });
-    } else {
+    } else if (leftPressed && paddleX > 0) {
       exports.paddleX = paddleX -= 7;
       socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index });
+    }
+  } else {
+    if (rightPressed && paddleTwoX < canvas.width - paddleWidth) {
+      exports.paddleTwoX = paddleTwoX += 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index });
+    } else if (leftPressed && paddleTwoX > 0) {
+      exports.paddleTwoX = paddleTwoX -= 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index });
     }
   }
   exports.x = x += dx;
@@ -6692,17 +6691,20 @@ function setSession(data) {
     window.location.href = '/board.html';
   }
 }
+
 socket.on('PlayersPaddlePositionChangeDone', function (data) {
   if (data.token !== token) {
     (0, _drawBoard.setPaddleTwoPosition)(data.x, data.index);
   }
   console.log(data.x);
 });
+
 socket.on('StartGameClient', function (data) {
   setInterval(function () {
     (0, _drawBoard.startAnimation)(token, index);
   }, 10);
 });
+
 function startGame(i) {
   //  initialise board game
   index = i;
