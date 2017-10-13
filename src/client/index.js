@@ -39,7 +39,6 @@ socket.on('PlayersPaddlePositionChangeDone', function (data) {
   if (data.token !== token) {
     setPaddleTwoPosition(data.x, data.index)
   }
-  console.log(data.x)
 })
 
 socket.on('StartGameClient', function (data) {
@@ -48,13 +47,22 @@ socket.on('StartGameClient', function (data) {
 
 function startGame (i) {
   //  initialise board game
-  index = i
-  document.querySelector('#gameManageBtn').textContent = 'Forfeit Game'
-  startAnimation(token, index)
-  if (index === 2) {
-    socket.emit('StartGame')
+  let room = document.getElementById('GroupName').value
+  if (room) {
+    socket.emit('ConnectToGameRoom', {room: room})
+    document.querySelector('#status').textContent = ''
+    index = i
+    document.querySelector('#gameManageBtn').remove()
+    document.querySelector('#gameManageBtnJoin').remove()
+    document.querySelector('#GroupName').remove()
+    startAnimation(token, index)
+    if (index === 2) {
+      socket.emit('StartGame')
+    } else {
+      socket.emit('JoinRoom')
+    }
   } else {
-    socket.emit('JoinRoom')
+    document.querySelector('#status').textContent = 'To Join a game please enter the Unique Room Name shared by your friend or to create a new game enter a new Room name'
   }
 }
 

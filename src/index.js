@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 1337
 const app = express()
 const secret = 'redPikachu'
 let index = 0
+let room
 let server = app.listen(PORT, () => {
   winston.info(`Server started listening on ${PORT}`)
 })
@@ -42,17 +43,21 @@ app.post('/user', (req, res) => {
 })
 
 io.sockets.on('connection', function (socket) {
-  socket.join('GameRoom')
-  console.log('joining room')
+  index = 0
+  socket.on('ConnectToGameRoom', function (data) {
+    room = data.room
+  })
   socket.on('StartGame', function (data) {
+    socket.join(room)
     if (index === 1) {
-      io.in('GameRoom').emit('StartGameClient')
+      io.in(room).emit('StartGameClient')
     }
   })
   socket.on('JoinRoom', function (data) {
     index = 1
+    socket.join(room)
   })
   socket.on('PlayersPaddlePositionChangeRequest', function (data) {
-    socket.broadcast.to('GameRoom').emit('PlayersPaddlePositionChangeDone', {token: data.token, x: data.x, index: data.index})
+    socket.broadcast.to(room).emit('PlayersPaddlePositionChangeDone', {token: data.token, x: data.x, index: data.index})
   })
 })

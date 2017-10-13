@@ -5,7 +5,7 @@ export let ballRadius = 10
 export let x = canvas && canvas.width / 2
 export let y = canvas && canvas.height - 100
 export let dx = 2
-export let dy = -2
+export let dy = -1
 export let paddleHeight = 10
 export let paddleWidth = 75
 export let paddleX = canvas && (canvas.width - paddleWidth) / 2
@@ -122,7 +122,7 @@ export function startAnimation (token, index) {
   } else if (y + dy > canvas.height - ballRadius) {
     if (x > paddleX && x < paddleX + paddleWidth) {
       hitcount++
-      dy = (hitcount % 10) === 0 ? -dy : -(dy / Math.abs(dy)) * (Math.abs(dy) + 1)
+      dy = (hitcount % 10) === 0 ? -(dy / Math.abs(dy)) * (Math.abs(dy) + 1) : -dy
     } else {
       dy = -dy
       clearBoard()

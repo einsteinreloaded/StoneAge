@@ -6433,7 +6433,7 @@ var ballRadius = exports.ballRadius = 10;
 var x = exports.x = canvas && canvas.width / 2;
 var y = exports.y = canvas && canvas.height - 100;
 var dx = exports.dx = 2;
-var dy = exports.dy = -2;
+var dy = exports.dy = -1;
 var paddleHeight = exports.paddleHeight = 10;
 var paddleWidth = exports.paddleWidth = 75;
 var paddleX = exports.paddleX = canvas && (canvas.width - paddleWidth) / 2;
@@ -6550,7 +6550,7 @@ function startAnimation(token, index) {
   } else if (y + dy > canvas.height - ballRadius) {
     if (x > paddleX && x < paddleX + paddleWidth) {
       exports.hitcount = hitcount += 1;
-      exports.dy = dy = hitcount % 10 === 0 ? -dy : -(dy / Math.abs(dy)) * (Math.abs(dy) + 1);
+      exports.dy = dy = hitcount % 10 === 0 ? -(dy / Math.abs(dy)) * (Math.abs(dy) + 1) : -dy;
     } else {
       exports.dy = dy = -dy;
       clearBoard();
@@ -6698,7 +6698,6 @@ socket.on('PlayersPaddlePositionChangeDone', function (data) {
   if (data.token !== token) {
     (0, _drawBoard.setPaddleTwoPosition)(data.x, data.index);
   }
-  console.log(data.x);
 });
 
 socket.on('StartGameClient', function (data) {
@@ -6709,13 +6708,22 @@ socket.on('StartGameClient', function (data) {
 
 function startGame(i) {
   //  initialise board game
-  index = i;
-  document.querySelector('#gameManageBtn').textContent = 'Forfeit Game';
-  (0, _drawBoard.startAnimation)(token, index);
-  if (index === 2) {
-    socket.emit('StartGame');
+  var room = document.getElementById('GroupName').value;
+  if (room) {
+    socket.emit('ConnectToGameRoom', { room: room });
+    document.querySelector('#status').textContent = '';
+    index = i;
+    document.querySelector('#gameManageBtn').remove();
+    document.querySelector('#gameManageBtnJoin').remove();
+    document.querySelector('#GroupName').remove();
+    (0, _drawBoard.startAnimation)(token, index);
+    if (index === 2) {
+      socket.emit('StartGame');
+    } else {
+      socket.emit('JoinRoom');
+    }
   } else {
-    socket.emit('JoinRoom');
+    document.querySelector('#status').textContent = 'To Join a game please enter the Unique Room Name shared by your friend or to create a new game enter a new Room name';
   }
 }
 
