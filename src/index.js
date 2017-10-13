@@ -43,7 +43,6 @@ app.post('/user', (req, res) => {
 })
 
 io.sockets.on('connection', function (socket) {
-  index = 0
   socket.on('ConnectToGameRoom', function (data) {
     room = data.room
   })
