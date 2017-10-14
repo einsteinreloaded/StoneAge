@@ -6417,7 +6417,7 @@ module.exports = yeast;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.hitcount = exports.score = exports.bricks = exports.brickOffsetLeft = exports.brickOffsetTop = exports.brickPadding = exports.brickHeight = exports.brickWidth = exports.brickColumnCount = exports.brickRowCount = exports.leftPressed = exports.rightPressed = exports.paddleTwoX = exports.paddleX = exports.paddleWidth = exports.paddleHeight = exports.dy = exports.dx = exports.y = exports.x = exports.ballRadius = exports.ctx = exports.canvas = undefined;
+exports.boardVars = undefined;
 exports.setPaddleTwoPosition = setPaddleTwoPosition;
 exports.startAnimation = startAnimation;
 
@@ -6427,70 +6427,67 @@ var _socket2 = _interopRequireDefault(_socket);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var canvas = exports.canvas = document.getElementById('boardCanvas');
-var ctx = exports.ctx = canvas && canvas.getContext('2d');
-var ballRadius = exports.ballRadius = 10;
-var x = exports.x = canvas && canvas.width / 2;
-var y = exports.y = canvas && canvas.height - 100;
-var dx = exports.dx = 2;
-var dy = exports.dy = -1;
-var paddleHeight = exports.paddleHeight = 10;
-var paddleWidth = exports.paddleWidth = 75;
-var paddleX = exports.paddleX = canvas && (canvas.width - paddleWidth) / 2;
-var paddleTwoX = exports.paddleTwoX = canvas && (canvas.width - paddleWidth) / 2;
-var rightPressed = exports.rightPressed = false;
-var leftPressed = exports.leftPressed = false;
-var brickRowCount = exports.brickRowCount = 3;
-var brickColumnCount = exports.brickColumnCount = 5;
-var brickWidth = exports.brickWidth = 75;
-var brickHeight = exports.brickHeight = 20;
-var brickPadding = exports.brickPadding = 10;
-var brickOffsetTop = exports.brickOffsetTop = 30;
-var brickOffsetLeft = exports.brickOffsetLeft = 30;
-var bricks = exports.bricks = [];
-var score = exports.score = 0;
-var hitcount = exports.hitcount = 0;
+var boardVars = exports.boardVars = {
+  canvas: document.getElementById('boardCanvas'),
+  ctx: null,
+  ballRadius: 10,
+  x: 0,
+  y: 0,
+  dx: 2,
+  dy: -1,
+  paddleHeight: 10,
+  paddleWidth: 75,
+  paddleX: 0,
+  paddleTwoX: 0,
+  rightPressed: false,
+  leftPressed: false,
+  brickRowCount: 3,
+  brickColumnCount: 5,
+  brickWidth: 75,
+  brickHeight: 20,
+  brickPadding: 10,
+  brickOffsetTop: 30,
+  brickOffsetLeft: 30,
+  bricks: [],
+  score: 0,
+  hitcount: 0
+};
 var socket = _socket2.default.connect();
+boardVars.ctx = boardVars.canvas && boardVars.canvas.getContext('2d');
+boardVars.paddleX = boardVars.canvas && (boardVars.canvas.width - boardVars.paddleWidth) / 2;
+boardVars.paddleTwoX = boardVars.canvas && (boardVars.canvas.width - boardVars.paddleWidth) / 2;
+boardVars.x = boardVars.canvas && boardVars.canvas.width / 2;
+boardVars.y = boardVars.canvas && boardVars.canvas.height - 100;
 
-for (var c = 0; c < brickColumnCount; c++) {
-  bricks[c] = [];
-  for (var r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1 };
+for (var c = 0; c < boardVars.brickColumnCount; c++) {
+  boardVars.bricks[c] = [];
+  for (var r = 0; r < boardVars.brickRowCount; r++) {
+    boardVars.bricks[c][r] = { x: 0, y: 0, status: 1 };
   }
 }
 function setPaddleListeners(token) {
   document.addEventListener('keydown', keyDownHandler, false);
   document.addEventListener('keyup', keyUpHandler, false);
-  // document.addEventListener('mousemove', mouseMoveHandler, false)
+}
 
-  function keyDownHandler(e) {
-    if (e.keyCode === 39) {
-      exports.rightPressed = rightPressed = true;
-    } else if (e.keyCode === 37) {
-      exports.leftPressed = leftPressed = true;
-    }
-  }
-
-  function keyUpHandler(e) {
-    if (e.keyCode === 39) {
-      exports.rightPressed = rightPressed = false;
-    } else if (e.keyCode === 37) {
-      exports.leftPressed = leftPressed = false;
-    }
-  }
-
-  function mouseMoveHandler(e) {
-    var relativeX = e.clientX - canvas.offsetLeft;
-    if (relativeX > 0 && relativeX < canvas.width) {
-      exports.paddleX = paddleX = relativeX - paddleWidth / 2;
-      //socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX })
-    }
+function keyDownHandler(e) {
+  if (e.keyCode === 39) {
+    boardVars.rightPressed = true;
+  } else if (e.keyCode === 37) {
+    boardVars.leftPressed = true;
   }
 }
 
+function keyUpHandler(e) {
+  if (e.keyCode === 39) {
+    boardVars.rightPressed = false;
+  } else if (e.keyCode === 37) {
+    boardVars.leftPressed = false;
+  }
+}
 function drawBall(ctx) {
   ctx.beginPath();
-  ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+  ctx.arc(boardVars.x, boardVars.y, boardVars.ballRadius, 0, Math.PI * 2);
   ctx.fillStyle = '#0095DD';
   ctx.fill();
   ctx.closePath();
@@ -6498,7 +6495,7 @@ function drawBall(ctx) {
 
 function drawPaddle(ctx) {
   ctx.beginPath();
-  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+  ctx.rect(boardVars.paddleX, boardVars.canvas.height - boardVars.paddleHeight, boardVars.paddleWidth, boardVars.paddleHeight);
   ctx.fillStyle = '#0095DD';
   ctx.fill();
   ctx.closePath();
@@ -6506,130 +6503,129 @@ function drawPaddle(ctx) {
 
 function drawSecondPaddle(ctx) {
   ctx.beginPath();
-  ctx.rect(paddleTwoX, 0, paddleWidth, paddleHeight);
+  ctx.rect(boardVars.paddleTwoX, 0, boardVars.paddleWidth, boardVars.paddleHeight);
   ctx.fillStyle = '#0095DD';
   ctx.fill();
   ctx.closePath();
 }
 
 function clearBoard() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  boardVars.ctx.clearRect(0, 0, boardVars.canvas.width, boardVars.canvas.height);
   alert('Game Over!!');
   document.location.reload();
 }
 
 function setPaddleTwoPosition(x, index) {
   if (index === 2) {
-    exports.paddleTwoX = paddleTwoX = x;
+    boardVars.paddleTwoX = x;
   } else {
-    exports.paddleX = paddleX = x;
+    boardVars.paddleX = x;
   }
 }
 
 function startAnimation(token, index) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  boardVars.ctx.clearRect(0, 0, boardVars.canvas.width, boardVars.canvas.height);
   // drawBoardCanvas(ctx)
-  drawBall(ctx);
-  drawSecondPaddle(ctx); // to draw top paddle
-  drawPaddle(ctx); // to draw bottom paddle
+  drawBall(boardVars.ctx);
+  drawSecondPaddle(boardVars.ctx); // to draw top paddle
+  drawPaddle(boardVars.ctx); // to draw bottom paddle
   // drawBricks(ctx)
   // drawScore(ctx)
   // collisionDetection(ctx)
   setPaddleListeners(token);
-  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-    exports.dx = dx = -dx;
+  if (boardVars.x + boardVars.dx > boardVars.canvas.width - boardVars.ballRadius || boardVars.x + boardVars.dx < boardVars.ballRadius) {
+    boardVars.dx = -boardVars.dx;
   }
-  if (y + dy < ballRadius) {
-    if (x > paddleTwoX && x < paddleTwoX + paddleWidth) {
-      exports.hitcount = hitcount += 1;
-      exports.dy = dy = hitcount % 10 === 0 ? -dy : -(dy / Math.abs(dy)) * (Math.abs(dy) + 1);
+  if (boardVars.y + boardVars.dy < boardVars.ballRadius) {
+    if (boardVars.x > boardVars.paddleTwoX && boardVars.x < boardVars.paddleTwoX + boardVars.paddleWidth) {
+      boardVars.hitcount++;
+      boardVars.dy = boardVars.hitcount % 10 === 0 ? -boardVars.dy : -(boardVars.dy / Math.abs(boardVars.dy)) * (Math.abs(boardVars.dy) + 1);
     } else {
-      exports.dy = dy = -dy;
+      boardVars.dy = -boardVars.dy;
       clearBoard();
     }
-  } else if (y + dy > canvas.height - ballRadius) {
-    if (x > paddleX && x < paddleX + paddleWidth) {
-      exports.hitcount = hitcount += 1;
-      exports.dy = dy = hitcount % 10 === 0 ? -(dy / Math.abs(dy)) * (Math.abs(dy) + 1) : -dy;
+  } else if (boardVars.y + boardVars.dy > boardVars.canvas.height - boardVars.ballRadius) {
+    if (boardVars.x > boardVars.paddleX && boardVars.x < boardVars.paddleX + boardVars.paddleWidth) {
+      boardVars.hitcount++;
+      boardVars.dy = boardVars.hitcount % 10 === 0 ? -(boardVars.dy / Math.abs(boardVars.dy)) * (Math.abs(boardVars.dy) + 1) : -boardVars.dy;
     } else {
-      exports.dy = dy = -dy;
+      boardVars.dy = -boardVars.dy;
       clearBoard();
     }
   }
   if (index === 1) {
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-      exports.paddleX = paddleX += 7;
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index });
-    } else if (leftPressed && paddleX > 0) {
-      exports.paddleX = paddleX -= 7;
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index });
+    if (boardVars.rightPressed && boardVars.paddleX < boardVars.canvas.width - boardVars.paddleWidth) {
+      boardVars.paddleX += 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: boardVars.paddleX, index: index });
+    } else if (boardVars.leftPressed && boardVars.paddleX > 0) {
+      boardVars.paddleX -= 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: boardVars.paddleX, index: index });
     }
   } else {
-    if (rightPressed && paddleTwoX < canvas.width - paddleWidth) {
-      exports.paddleTwoX = paddleTwoX += 7;
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index });
-    } else if (leftPressed && paddleTwoX > 0) {
-      exports.paddleTwoX = paddleTwoX -= 7;
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index });
+    if (boardVars.rightPressed && boardVars.paddleTwoX < boardVars.canvas.width - boardVars.paddleWidth) {
+      boardVars.paddleTwoX += 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: boardVars.paddleTwoX, index: index });
+    } else if (boardVars.leftPressed && boardVars.paddleTwoX > 0) {
+      boardVars.paddleTwoX -= 7;
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: boardVars.paddleTwoX, index: index });
     }
   }
-  exports.x = x += dx;
-  exports.y = y += dy;
+  boardVars.x += boardVars.dx;
+  boardVars.y += boardVars.dy;
 }
 
-function drawBricks(ctx) {
-  for (var _c = 0; _c < brickColumnCount; _c++) {
-    for (var _r = 0; _r < brickRowCount; _r++) {
-      if (bricks[_c][_r].status === 1) {
-        var brickX = _c * (brickWidth + brickPadding) + brickOffsetLeft;
-        var brickY = _r * (brickHeight + brickPadding) + brickOffsetTop;
-        bricks[_c][_r].x = brickX;
-        bricks[_c][_r].y = brickY;
-        ctx.beginPath();
-        ctx.rect(brickX, brickY, brickWidth, brickHeight);
-        ctx.fillStyle = '#0095DD';
-        ctx.fill();
-        ctx.closePath();
-      }
-    }
-  }
-}
+// function drawBricks (ctx) {
+//   for (let c = 0; c < brickColumnCount; c++) {
+//     for (let r = 0; r < brickRowCount; r++) {
+//       if (bricks[c][r].status === 1) {
+//         let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft
+//         let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop
+//         bricks[c][r].x = brickX
+//         bricks[c][r].y = brickY
+//         ctx.beginPath()
+//         ctx.rect(brickX, brickY, brickWidth, brickHeight)
+//         ctx.fillStyle = '#0095DD'
+//         ctx.fill()
+//         ctx.closePath()
+//       }
+//     }
+//   }
+// }
 
-function collisionDetection(ctx) {
-  for (var _c2 = 0; _c2 < brickColumnCount; _c2++) {
-    for (var _r2 = 0; _r2 < brickRowCount; _r2++) {
-      var b = bricks[_c2][_r2];
-      if (b.status === 1) {
-        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
-          exports.dy = dy = -dy;
-          b.status = 0;
-          exports.score = score += 1;
-          if (score === brickRowCount * brickColumnCount) {
-            alert('YOU WIN, CONGRATULATIONS!');
-            document.location.reload();
-          }
-        }
-      }
-    }
-  }
-}
-function drawScore(ctx) {
-  ctx.font = '16px Arial';
-  ctx.fillStyle = '#0095DD';
-  ctx.fillText('Score: ' + score, 8, 20);
-}
-function drawBoardCanvas(ctx) {
-  // draw game board
-  var offset = 0;
-  ctx.strokeRect(offset, offset, canvas.width - 2 * offset, canvas.height - 2 * offset);
-  ctx.beginPath();
-  ctx.moveTo(canvas.width / 2, offset);
-  ctx.lineTo(canvas.width / 2, canvas.height - offset);
-  ctx.moveTo(offset, canvas.height / 2);
-  ctx.lineTo(canvas.width - offset, canvas.height / 2);
-  ctx.stroke();
-  ctx.closePath();
-}
+// function collisionDetection (ctx) {
+//   for (let c = 0; c < brickColumnCount; c++) {
+//     for (let r = 0; r < brickRowCount; r++) {
+//       let b = bricks[c][r]
+//       if (b.status === 1) {
+//         if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+//           dy = -dy
+//           b.status = 0
+//           score++
+//           if (score === brickRowCount * brickColumnCount) {
+//             alert('YOU WIN, CONGRATULATIONS!')
+//             document.location.reload()
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+// function drawScore (ctx) {
+//   ctx.font = '16px Arial'
+//   ctx.fillStyle = '#0095DD'
+//   ctx.fillText('Score: ' + score, 8, 20)
+// }
+// function drawBoardCanvas (ctx) { // draw game board
+//   let offset = 0
+//   ctx.strokeRect(offset, offset, canvas.width - 2 * offset, canvas.height - 2 * offset)
+//   ctx.beginPath()
+//   ctx.moveTo((canvas.width) / 2, offset)
+//   ctx.lineTo((canvas.width) / 2, canvas.height - offset)
+//   ctx.moveTo(offset, (canvas.height) / 2)
+//   ctx.lineTo(canvas.width - offset, (canvas.height) / 2)
+//   ctx.stroke()
+//   ctx.closePath()
+// }
 
 // export default function startRotation () {
 //   let canvas = document.getElementById('boardCanvas')
@@ -6713,9 +6709,7 @@ function startGame(i) {
     socket.emit('ConnectToGameRoom', { room: room });
     document.querySelector('#status').textContent = '';
     index = i;
-    document.querySelector('#gameManageBtn').remove();
-    document.querySelector('#gameManageBtnJoin').remove();
-    document.querySelector('#GroupName').remove();
+    document.querySelector('.start-popup').remove();
     (0, _drawBoard.startAnimation)(token, index);
     if (index === 2) {
       socket.emit('StartGame');

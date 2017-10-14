@@ -1,68 +1,65 @@
 import io from 'socket.io-client'
-export let canvas = document.getElementById('boardCanvas')
-export let ctx = canvas && canvas.getContext('2d')
-export let ballRadius = 10
-export let x = canvas && canvas.width / 2
-export let y = canvas && canvas.height - 100
-export let dx = 2
-export let dy = -1
-export let paddleHeight = 10
-export let paddleWidth = 75
-export let paddleX = canvas && (canvas.width - paddleWidth) / 2
-export let paddleTwoX = canvas && (canvas.width - paddleWidth) / 2
-export let rightPressed = false
-export let leftPressed = false
-export let brickRowCount = 3
-export let brickColumnCount = 5
-export let brickWidth = 75
-export let brickHeight = 20
-export let brickPadding = 10
-export let brickOffsetTop = 30
-export let brickOffsetLeft = 30
-export let bricks = []
-export let score = 0
-export let hitcount = 0
+export let boardVars = {
+  canvas: document.getElementById('boardCanvas'),
+  ctx: null,
+  ballRadius: 10,
+  x: 0,
+  y: 0,
+  dx: 2,
+  dy: -1,
+  paddleHeight: 10,
+  paddleWidth: 75,
+  paddleX: 0,
+  paddleTwoX: 0,
+  rightPressed: false,
+  leftPressed: false,
+  brickRowCount: 3,
+  brickColumnCount: 5,
+  brickWidth: 75,
+  brickHeight: 20,
+  brickPadding: 10,
+  brickOffsetTop: 30,
+  brickOffsetLeft: 30,
+  bricks: [],
+  score: 0,
+  hitcount: 0
+}
 const socket = io.connect()
+boardVars.ctx = boardVars.canvas && boardVars.canvas.getContext('2d')
+boardVars.paddleX = boardVars.canvas && (boardVars.canvas.width - boardVars.paddleWidth) / 2
+boardVars.paddleTwoX = boardVars.canvas && (boardVars.canvas.width - boardVars.paddleWidth) / 2
+boardVars.x = boardVars.canvas && boardVars.canvas.width / 2
+boardVars.y = boardVars.canvas && boardVars.canvas.height - 100
 
-for (let c = 0; c < brickColumnCount; c++) {
-  bricks[c] = []
-  for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1 }
+for (let c = 0; c < boardVars.brickColumnCount; c++) {
+  boardVars.bricks[c] = []
+  for (let r = 0; r < boardVars.brickRowCount; r++) {
+    boardVars.bricks[c][r] = { x: 0, y: 0, status: 1 }
   }
 }
 function setPaddleListeners (token) {
   document.addEventListener('keydown', keyDownHandler, false)
   document.addEventListener('keyup', keyUpHandler, false)
-  // document.addEventListener('mousemove', mouseMoveHandler, false)
+}
 
-  function keyDownHandler (e) {
-    if (e.keyCode === 39) {
-      rightPressed = true
-    } else if (e.keyCode === 37) {
-      leftPressed = true
-    }
-  }
-
-  function keyUpHandler (e) {
-    if (e.keyCode === 39) {
-      rightPressed = false
-    } else if (e.keyCode === 37) {
-      leftPressed = false
-    }
-  }
-
-  function mouseMoveHandler (e) {
-    let relativeX = e.clientX - canvas.offsetLeft
-    if (relativeX > 0 && relativeX < canvas.width) {
-      paddleX = relativeX - paddleWidth / 2
-      //socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX })
-    }
+function keyDownHandler (e) {
+  if (e.keyCode === 39) {
+    boardVars.rightPressed = true
+  } else if (e.keyCode === 37) {
+    boardVars.leftPressed = true
   }
 }
 
+function keyUpHandler (e) {
+  if (e.keyCode === 39) {
+    boardVars.rightPressed = false
+  } else if (e.keyCode === 37) {
+    boardVars.leftPressed = false
+  }
+}
 function drawBall (ctx) {
   ctx.beginPath()
-  ctx.arc(x, y, ballRadius, 0, Math.PI * 2)
+  ctx.arc(boardVars.x, boardVars.y, boardVars.ballRadius, 0, Math.PI * 2)
   ctx.fillStyle = '#0095DD'
   ctx.fill()
   ctx.closePath()
@@ -70,7 +67,7 @@ function drawBall (ctx) {
 
 function drawPaddle (ctx) {
   ctx.beginPath()
-  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight)
+  ctx.rect(boardVars.paddleX, boardVars.canvas.height - boardVars.paddleHeight, boardVars.paddleWidth, boardVars.paddleHeight)
   ctx.fillStyle = '#0095DD'
   ctx.fill()
   ctx.closePath()
@@ -78,129 +75,129 @@ function drawPaddle (ctx) {
 
 function drawSecondPaddle (ctx) {
   ctx.beginPath()
-  ctx.rect(paddleTwoX, 0, paddleWidth, paddleHeight)
+  ctx.rect(boardVars.paddleTwoX, 0, boardVars.paddleWidth, boardVars.paddleHeight)
   ctx.fillStyle = '#0095DD'
   ctx.fill()
   ctx.closePath()
 }
 
 function clearBoard () {
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  boardVars.ctx.clearRect(0, 0, boardVars.canvas.width, boardVars.canvas.height)
   alert('Game Over!!')
   document.location.reload()
 }
 
 export function setPaddleTwoPosition (x, index) {
   if (index === 2) {
-    paddleTwoX = x
+    boardVars.paddleTwoX = x
   } else {
-    paddleX = x
+    boardVars.paddleX = x
   }
 }
 
 export function startAnimation (token, index) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  boardVars.ctx.clearRect(0, 0, boardVars.canvas.width, boardVars.canvas.height)
   // drawBoardCanvas(ctx)
-  drawBall(ctx)
-  drawSecondPaddle(ctx)// to draw top paddle
-  drawPaddle(ctx)// to draw bottom paddle
+  drawBall(boardVars.ctx)
+  drawSecondPaddle(boardVars.ctx)// to draw top paddle
+  drawPaddle(boardVars.ctx)// to draw bottom paddle
   // drawBricks(ctx)
   // drawScore(ctx)
  // collisionDetection(ctx)
   setPaddleListeners(token)
-  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-    dx = -dx
+  if (boardVars.x + boardVars.dx > boardVars.canvas.width - boardVars.ballRadius || boardVars.x + boardVars.dx < boardVars.ballRadius) {
+    boardVars.dx = -boardVars.dx
   }
-  if (y + dy < ballRadius) {
-    if (x > paddleTwoX && x < paddleTwoX + paddleWidth) {
-      hitcount++
-      dy = (hitcount % 10) === 0 ? -dy : -(dy / Math.abs(dy)) * (Math.abs(dy) + 1)
+  if (boardVars.y + boardVars.dy < boardVars.ballRadius) {
+    if (boardVars.x > boardVars.paddleTwoX && boardVars.x < boardVars.paddleTwoX + boardVars.paddleWidth) {
+      boardVars.hitcount++
+      boardVars.dy = (boardVars.hitcount % 10) === 0 ? -boardVars.dy : -(boardVars.dy / Math.abs(boardVars.dy)) * (Math.abs(boardVars.dy) + 1)
     } else {
-      dy = -dy
+      boardVars.dy = -boardVars.dy
       clearBoard()
     }
-  } else if (y + dy > canvas.height - ballRadius) {
-    if (x > paddleX && x < paddleX + paddleWidth) {
-      hitcount++
-      dy = (hitcount % 10) === 0 ? -(dy / Math.abs(dy)) * (Math.abs(dy) + 1) : -dy
+  } else if (boardVars.y + boardVars.dy > boardVars.canvas.height - boardVars.ballRadius) {
+    if (boardVars.x > boardVars.paddleX && boardVars.x < boardVars.paddleX + boardVars.paddleWidth) {
+      boardVars.hitcount++
+      boardVars.dy = (boardVars.hitcount % 10) === 0 ? -(boardVars.dy / Math.abs(boardVars.dy)) * (Math.abs(boardVars.dy) + 1) : -boardVars.dy
     } else {
-      dy = -dy
+      boardVars.dy = -boardVars.dy
       clearBoard()
     }
   }
   if (index === 1) {
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-      paddleX += 7
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index })
-    } else if (leftPressed && paddleX > 0) {
-      paddleX -= 7
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleX, index: index })
+    if (boardVars.rightPressed && boardVars.paddleX < boardVars.canvas.width - boardVars.paddleWidth) {
+      boardVars.paddleX += 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: boardVars.paddleX, index: index })
+    } else if (boardVars.leftPressed && boardVars.paddleX > 0) {
+      boardVars.paddleX -= 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: boardVars.paddleX, index: index })
     }
   } else {
-    if (rightPressed && paddleTwoX < canvas.width - paddleWidth) {
-      paddleTwoX += 7
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index })
-    } else if (leftPressed && paddleTwoX > 0) {
-      paddleTwoX -= 7
-      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: paddleTwoX, index: index })
+    if (boardVars.rightPressed && boardVars.paddleTwoX < boardVars.canvas.width - boardVars.paddleWidth) {
+      boardVars.paddleTwoX += 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: boardVars.paddleTwoX, index: index })
+    } else if (boardVars.leftPressed && boardVars.paddleTwoX > 0) {
+      boardVars.paddleTwoX -= 7
+      socket.emit('PlayersPaddlePositionChangeRequest', { token: token, x: boardVars.paddleTwoX, index: index })
     }
   }
-  x += dx
-  y += dy
+  boardVars.x += boardVars.dx
+  boardVars.y += boardVars.dy
 }
 
-function drawBricks (ctx) {
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      if (bricks[c][r].status === 1) {
-        let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft
-        let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop
-        bricks[c][r].x = brickX
-        bricks[c][r].y = brickY
-        ctx.beginPath()
-        ctx.rect(brickX, brickY, brickWidth, brickHeight)
-        ctx.fillStyle = '#0095DD'
-        ctx.fill()
-        ctx.closePath()
-      }
-    }
-  }
-}
+// function drawBricks (ctx) {
+//   for (let c = 0; c < brickColumnCount; c++) {
+//     for (let r = 0; r < brickRowCount; r++) {
+//       if (bricks[c][r].status === 1) {
+//         let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft
+//         let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop
+//         bricks[c][r].x = brickX
+//         bricks[c][r].y = brickY
+//         ctx.beginPath()
+//         ctx.rect(brickX, brickY, brickWidth, brickHeight)
+//         ctx.fillStyle = '#0095DD'
+//         ctx.fill()
+//         ctx.closePath()
+//       }
+//     }
+//   }
+// }
 
-function collisionDetection (ctx) {
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      let b = bricks[c][r]
-      if (b.status === 1) {
-        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
-          dy = -dy
-          b.status = 0
-          score++
-          if (score === brickRowCount * brickColumnCount) {
-            alert('YOU WIN, CONGRATULATIONS!')
-            document.location.reload()
-          }
-        }
-      }
-    }
-  }
-}
-function drawScore (ctx) {
-  ctx.font = '16px Arial'
-  ctx.fillStyle = '#0095DD'
-  ctx.fillText('Score: ' + score, 8, 20)
-}
-function drawBoardCanvas (ctx) { // draw game board
-  let offset = 0
-  ctx.strokeRect(offset, offset, canvas.width - 2 * offset, canvas.height - 2 * offset)
-  ctx.beginPath()
-  ctx.moveTo((canvas.width) / 2, offset)
-  ctx.lineTo((canvas.width) / 2, canvas.height - offset)
-  ctx.moveTo(offset, (canvas.height) / 2)
-  ctx.lineTo(canvas.width - offset, (canvas.height) / 2)
-  ctx.stroke()
-  ctx.closePath()
-}
+// function collisionDetection (ctx) {
+//   for (let c = 0; c < brickColumnCount; c++) {
+//     for (let r = 0; r < brickRowCount; r++) {
+//       let b = bricks[c][r]
+//       if (b.status === 1) {
+//         if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+//           dy = -dy
+//           b.status = 0
+//           score++
+//           if (score === brickRowCount * brickColumnCount) {
+//             alert('YOU WIN, CONGRATULATIONS!')
+//             document.location.reload()
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+// function drawScore (ctx) {
+//   ctx.font = '16px Arial'
+//   ctx.fillStyle = '#0095DD'
+//   ctx.fillText('Score: ' + score, 8, 20)
+// }
+// function drawBoardCanvas (ctx) { // draw game board
+//   let offset = 0
+//   ctx.strokeRect(offset, offset, canvas.width - 2 * offset, canvas.height - 2 * offset)
+//   ctx.beginPath()
+//   ctx.moveTo((canvas.width) / 2, offset)
+//   ctx.lineTo((canvas.width) / 2, canvas.height - offset)
+//   ctx.moveTo(offset, (canvas.height) / 2)
+//   ctx.lineTo(canvas.width - offset, (canvas.height) / 2)
+//   ctx.stroke()
+//   ctx.closePath()
+// }
 
 // export default function startRotation () {
 //   let canvas = document.getElementById('boardCanvas')
