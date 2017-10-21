@@ -1,4 +1,4 @@
-import { canvas, ctx, ballRadius, x, y, dx, dy, paddleHeight, paddleWidth, paddleX, paddleTwoX, rightPressed, leftPressed, brickRowCount, hitcount, brickColumnCount, brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks, score, setPaddleTwoPosition, startAnimation } from './drawBoard.js'
+import { boardVars, setPaddleTwoPosition, startAnimation } from './drawBoard.js'
 import io from 'socket.io-client'
 const socket = io.connect()
 let token = localStorage.getItem('token')
@@ -52,9 +52,7 @@ function startGame (i) {
     socket.emit('ConnectToGameRoom', {room: room})
     document.querySelector('#status').textContent = ''
     index = i
-    document.querySelector('#gameManageBtn').remove()
-    document.querySelector('#gameManageBtnJoin').remove()
-    document.querySelector('#GroupName').remove()
+    document.querySelector('.start-popup').remove()
     startAnimation(token, index)
     if (index === 2) {
       socket.emit('StartGame')
